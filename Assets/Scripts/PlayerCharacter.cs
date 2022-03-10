@@ -25,18 +25,17 @@ public class PlayerCharacter : MonoBehaviour
 
     }
 
-    public void Hit()
+    public void Hit(int damage)
     {
-        _hp--;
+        _hp-=damage;
         _hpBar.value = (float)_hp / (float)_startHp;
         if (_hp <= 0)
         {
-            Destroy(this.gameObject);
             _restartButton.gameObject.SetActive(true);
-            Camera.main.GetComponent<RayShooter>().enabled = false;
             Camera.main.GetComponent<MouseLook>().enabled = false;
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
+            this.gameObject.SetActive(false);
         }
     }
 }

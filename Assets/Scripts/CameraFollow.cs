@@ -26,7 +26,9 @@ public class CameraFollow : MonoBehaviour
             transform.position = new Vector3(_player.transform.position.x - offsetX,
                 _player.transform.position.y - offsetY,
                 _player.transform.position.z - offsetZ);
-            transform.forward = _player.forward;
+            transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x,
+                _player.rotation.eulerAngles.y,
+                transform.rotation.eulerAngles.z);
         }
     }
 }

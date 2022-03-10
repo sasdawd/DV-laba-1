@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class ReactiveTarget : MonoBehaviour
 {
+    private SceneController _controller;
     [SerializeField]
     private Animator _animator;
     public void ReactToHit()
@@ -24,17 +25,16 @@ public class ReactiveTarget : MonoBehaviour
 
         yield return new WaitForSeconds(3.5f);
 
+        _controller.EnemyDie(this.gameObject);
+
         Destroy(this.gameObject);
     }
 
-    void Start()
+    public SceneController controller
     {
-        
-    }
-
-   
-    void Update()
-    {
-        
+        set
+        {
+            _controller = value;
+        }
     }
 }

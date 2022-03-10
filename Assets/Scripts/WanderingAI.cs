@@ -5,7 +5,7 @@ using UnityEngine;
 public class WanderingAI : MonoBehaviour
 {
     public float speed = 3.0f;
-    public float obstacleRange = 7.5f;
+    public float obstacleRange = 5f;
     private bool _alive;
     [SerializeField]
     private GameObject fireballPrefab;
@@ -31,15 +31,16 @@ public class WanderingAI : MonoBehaviour
         {
             transform.Translate(0, 0, speed * Time.deltaTime);
         }
-        Ray ray = new Ray(transform.position, transform.forward);
+        Ray ray = new Ray(new Vector3(transform.position.x,transform.position.y+1f,transform.position.z), transform.forward);
         RaycastHit hit;
-        if(Physics.SphereCast(ray,0.75f, out hit))
+        if(Physics.Raycast(ray, out hit))
         {
             GameObject hitObject = hit.transform.gameObject;
+            Debug.DrawRay(ray.origin, ray.direction);
             if (hitObject.GetComponent<PlayerCharacter>())
             {
                 if (_timeElapsedFromShoot >= _shootDelay)
-                {
+                { 
                     _fireball = Instantiate(fireballPrefab) as GameObject;
                     _fireball.transform.position = _fireballSpawnPosition.position;
                     _fireball.transform.rotation = transform.rotation;
@@ -48,8 +49,40 @@ public class WanderingAI : MonoBehaviour
             }
             else if (hit.distance < obstacleRange&&!_isRotating)
             {
-                float angle = Random.Range(0, 180);
-                Debug.Log(angle);
+                float angle = 0f;
+                Vector3 point;
+                if (transform.rotation.eulerAngles.y <= 90f)
+                {
+                    point = hit.point;
+                    point.z -= hit.collider.transform.localScale.z;
+                    if (point.z > transform.position.z)
+                        angle = Random.Range(90f, 180f);
+                    else angle = Random.Range(-180f, -90f);
+                }
+                else if(transform.rotation.eulerAngles.y > 90f&&transform.rotation.eulerAngles.y<=180f)
+                {
+                    point = hit.point;
+                    point.x -= hit.collider.transform.localScale.x;
+                    if (point.x > transform.position.x)
+                        angle = Random.Range(90f, 180f);
+                    else angle = Random.Range(-180f, -90f);
+                }
+                else if (transform.rotation.eulerAngles.y > 180f && transform.rotation.eulerAngles.y <= 270f)
+                {
+                    point = hit.point;
+                    point.z += hit.collider.transform.localScale.z;
+                    if (point.z < transform.position.z)
+                        angle = Random.Range(90f, 180f);
+                    else angle = Random.Range(-180f, -90f);
+                }
+                else
+                {
+                    point = hit.point;
+                    point.x += hit.collider.transform.localScale.x;
+                    if (point.x < transform.position.x)
+                        angle = Random.Range(90f, 180f);
+                    else angle = Random.Range(-180f, -90f);
+                }
                 StartCoroutine(RotateEnemy(angle));
             }
         }    
@@ -68,7 +101,7 @@ public class WanderingAI : MonoBehaviour
         endRotation = Quaternion.Euler(endRotation.eulerAngles.x,
             endRotation.eulerAngles.y + angle,
             endRotation.eulerAngles.z);
-        float progress = 0f, elapsedTime = 0f, duration = angle/180f;
+        float progress = 0f, elapsedTime = 0f, duration = Mathf.Abs(angle)/360f;
         while (progress <= 1f)
         {
             transform.rotation = Quaternion.Lerp(startRotation, endRotation, progress);
